@@ -1,0 +1,10 @@
+# 微信公众号配置
+wechat:
+  app_id: "your_app_id"
+  app_secret: "your_app_secret"
+  token: "your_token"
+
+# 服务器配置
+server:
+  port: 8080
+  mode: "debug" # debug, release

@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>微信发布工具测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            color: black;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #ccc;
+        }
+        .tabcontent {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>微信发布工具测试</h1>
+    
+    <div class="tab">
+        <button class="tablinks" onclick="openTab(event, 'upload')">上传图片</button>
+        <button class="tablinks" onclick="openTab(event, 'draft')">创建草稿</button>
+        <button class="tablinks" onclick="openTab(event, 'publish')">发布草稿</button>
+    </div>
+
+    <div id="upload" class="tabcontent">
+        <h2>上传图片</h2>
+        <div class="form-group">
+            <label for="uploadType">上传类型：</label>
+            <select id="uploadType">
+                <option value="material">素材库图片</option>
+                <option value="news-image">图文消息图片</option>
+            </select>
+        </div>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="image">选择图片：</label>
+                <input type="file" id="image" name="image" accept="image/*">
+            </div>
+            <button type="submit">上传</button>
+        </form>
+        <div class="result" id="uploadResult"></div>
+    </div>
+
+    <div id="draft" class="tabcontent">
+        <h2>创建草稿</h2>
+        <form id="draftForm">
+            <div class="form-group">
+                <label for="draftType">草稿类型：</label>
+                <select id="draftType" name="type">
+                    <option value="news">图文消息</option>
+                    <option value="newspic">图片消息</option>
+                </select>
+            </div>
+            <div class="form-group" id="newsFields">
+                <label for="title">标题：</label>
+                <input type="text" id="title" name="title" value="测试标题" required>
+            </div>
+            <div class="form-group" id="newsFields">
+                <label for="author">作者：</label>
+                <input type="text" id="author" name="author" value="极客老墨" required>
+            </div>
+            <div class="form-group" id="newsFields">
+                <label for="digest">摘要：</label>
+                <textarea id="digest" name="digest">测试摘要</textarea>
+            </div>
+            <div class="form-group" id="newsFields">
+                <label for="content">内容：</label>
+                <textarea id="content" name="content" required>这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
+            </div>
+            <div class="form-group" id="newsFields">
+                <label for="thumbMediaId">封面图片MediaID：</label>
+                <input type="text" id="thumbMediaId" name="thumb_media_id" required>
+            </div>
+            <div class="form-group imageFields" style="display: none;">
+                <label for="imageTitle">标题：</label>
+                <input type="text" id="imageTitle" name="image_title" required>
+            </div>
+            <div class="form-group imageFields" style="display: none;">
+                <label for="imageAuthor">作者：</label>
+                <input type="text" id="imageAuthor" name="image_author">
+            </div>
+            <div class="form-group imageFields" style="display: none;">
+                <label for="imageContent">内容：</label>
+                <textarea id="imageContent" name="image_content"></textarea>
+            </div>
+            <div class="form-group imageFields" style="display: none;">
+                <label>图片MediaID列表：</label>
+                <div id="mediaIdList">
+                    <div class="media-id-item">
+                        <input type="text" class="media-id-input" placeholder="请输入图片MediaID">
+                        <button type="button" onclick="removeMediaIdItem(this)">删除</button>
+                    </div>
+                </div>
+                <button type="button" onclick="addMediaIdItem()">添加图片</button>
+            </div>
+            <button type="submit">创建草稿</button>
+        </form>
+        <div class="result" id="draftResult"></div>
+    </div>
+
+    <div id="publish" class="tabcontent">
+        <h2>发布草稿</h2>
+        <form id="publishForm">
+            <div class="form-group">
+                <label for="mediaId">草稿MediaID：</label>
+                <input type="text" id="mediaId" name="media_id" required>
+            </div>
+            <button type="submit">发布</button>
+        </form>
+        <div class="result" id="publishResult"></div>
+    </div>
+
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        // 默认打开第一个标签
+        document.getElementsByClassName("tablinks")[0].click();
+
+        // 添加图片MediaID输入框
+        function addMediaIdItem() {
+            var mediaIdList = document.getElementById('mediaIdList');
+            var newItem = document.createElement('div');
+            newItem.className = 'media-id-item';
+            newItem.innerHTML = `
+                <input type="text" class="media-id-input" placeholder="请输入图片MediaID">
+                <button type="button" onclick="removeMediaIdItem(this)">删除</button>
+            `;
+            mediaIdList.appendChild(newItem);
+        }
+
+        // 删除图片MediaID输入框
+        function removeMediaIdItem(button) {
+            var item = button.parentElement;
+            var mediaIdList = document.getElementById('mediaIdList');
+            if (mediaIdList.children.length > 1) {
+                mediaIdList.removeChild(item);
+            }
+        }
+
+        // 上传图片
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = new FormData();
+            var fileInput = document.getElementById('image');
+            formData.append('image', fileInput.files[0]);
+
+            var uploadType = document.getElementById('uploadType').value;
+            var url = '';
+            if (uploadType === 'material') {
+                url = '/api/upload/material';
+            } else if (uploadType === 'news-image') {
+                url = '/api/upload/news-image';
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('uploadResult').innerHTML = JSON.stringify(data, null, 2);
+                // 如果是上传图文消息图片，自动在内容输入框中插入图片标签
+                if (uploadType === 'news-image' && data.url) {
+                    var contentInput = document.getElementById('content');
+                    var imgTag = `<img src="${data.url}" style="max-width: 100%;">`;
+                    contentInput.value += '\n' + imgTag;
+                }
+            })
+            .catch(error => {
+                document.getElementById('uploadResult').innerHTML = '错误：' + error.message;
+            });
+        });
+
+        // 草稿类型选择逻辑
+        document.getElementById('draftType').addEventListener('change', function() {
+            var type = this.value;
+            if (type === 'news') {
+                document.querySelectorAll('#newsFields').forEach(function(field) {
+                    field.style.display = 'block';
+                });
+                document.querySelectorAll('.imageFields').forEach(function(field) {
+                    field.style.display = 'none';
+                });
+            } else if (type === 'newspic') {
+                document.querySelectorAll('#newsFields').forEach(function(field) {
+                    field.style.display = 'none';
+                });
+                document.querySelectorAll('.imageFields').forEach(function(field) {
+                    field.style.display = 'block';
+                });
+            }
+        });
+
+        // 创建草稿
+        document.getElementById('draftForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var type = document.getElementById('draftType').value;
+            var formData = { type: type };
+
+            if (type === 'news') {
+                formData.article = {
+                    title: document.getElementById('title').value,
+                    author: document.getElementById('author').value,
+                    digest: document.getElementById('digest').value,
+                    content: document.getElementById('content').value,
+                    thumb_media_id: document.getElementById('thumbMediaId').value,
+                    need_open_comment: 0,
+                    only_fans_can_comment: 0
+                };
+            } else if (type === 'newspic') {
+                // 收集图片MediaID列表
+                var mediaIdList = [];
+                var mediaIdInputs = document.querySelectorAll('.media-id-input');
+                mediaIdInputs.forEach(function(input) {
+                    if (input.value.trim() !== '') {
+                        mediaIdList.push(input.value.trim());
+                    }
+                });
+                
+                formData.image_article = {
+                    title: document.getElementById('imageTitle').value,
+                    author: document.getElementById('imageAuthor').value,
+                    content: document.getElementById('imageContent').value,
+                    media_id_list: mediaIdList
+                };
+            }
+
+            fetch('/api/draft/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('draftResult').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('draftResult').innerHTML = '错误：' + error.message;
+            });
+        });
+
+        // 发布草稿
+        document.getElementById('publishForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var formData = {
+                media_id: document.getElementById('mediaId').value
+            };
+
+            fetch('/api/draft/publish', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('publishResult').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                document.getElementById('publishResult').innerHTML = '错误：' + error.message;
+            });
+        });
+    </script>
+</body>
+</html>
