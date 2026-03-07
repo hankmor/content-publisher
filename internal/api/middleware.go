@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/sha256"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -68,10 +70,20 @@ func getAPIKey(ctx *gin.Context) string {
 	return ctx.Query("api_key")
 }
 
+// hashAPIKey 对 API Key 进行哈希处理
+func hashAPIKey(apiKey string) string {
+	hash := sha256.Sum256([]byte(apiKey))
+	return fmt.Sprintf("%x", hash)
+}
+
 // isAPIKeyValid 检查 API Key 是否有效
 func isAPIKeyValid(apiKey string, validKeys []string) bool {
+	// 对客户端提供的 API Key 进行哈希处理
+	hashedAPIKey := hashAPIKey(apiKey)
+	
+	// 对配置中的每个有效 API Key 进行哈希处理并比较
 	for _, key := range validKeys {
-		if apiKey == key {
+		if hashedAPIKey == hashAPIKey(key) {
 			return true
 		}
 	}

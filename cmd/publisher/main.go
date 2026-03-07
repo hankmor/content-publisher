@@ -31,7 +31,8 @@ func main() {
 	// 初始化路由
 	router := gin.Default()
 	// 提供静态文件服务
-	router.StaticFile("/demo", "./demo.html")
+	router.StaticFile("/", "./API_GUIDE.md")
+	// router.StaticFile("/demo", "./demo.html")
 	// 传递配置到路由设置
 	api.SetupRoutes(router, controller, cfg)
 
