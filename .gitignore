@@ -24,3 +24,4 @@ config.yaml
 *.log
 logs/
 wechat-publisher
+output/

@@ -32,7 +32,8 @@ func main() {
 	router := gin.Default()
 	// 提供静态文件服务
 	router.StaticFile("/demo", "./demo.html")
-	api.SetupRoutes(router, controller)
+	// 传递配置到路由设置
+	api.SetupRoutes(router, controller, cfg)
 
 	// 启动服务器
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)

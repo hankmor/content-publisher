@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Wechat WechatConfig `mapstructure:"wechat"`
 	Server ServerConfig `mapstructure:"server"`
+	API    APIConfig    `mapstructure:"api"`
 }
 
 type WechatConfig struct {
@@ -22,6 +23,12 @@ type WechatConfig struct {
 type ServerConfig struct {
 	Port int    `mapstructure:"port"`
 	Mode string `mapstructure:"mode"`
+}
+
+// API 访问控制配置
+type APIConfig struct {
+	IPWhitelist []string `mapstructure:"ip_whitelist"`
+	APIKeys     []string `mapstructure:"api_keys"`
 }
 
 func LoadConfig() (*Config, error) {
