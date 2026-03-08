@@ -2,20 +2,27 @@ package main
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hankmor/wechat-publisher/internal/api"
 	"github.com/hankmor/wechat-publisher/internal/config"
+	"github.com/hankmor/wechat-publisher/internal/log"
 	"github.com/hankmor/wechat-publisher/internal/service"
+	"go.uber.org/zap"
 )
 
 func main() {
 	// 加载配置
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("加载配置失败: %v", err)
+		panic(err)
 	}
+
+	// 初始化日志
+	if err := log.InitLogger(&cfg.Log); err != nil {
+		panic(err)
+	}
+	defer log.Logger.Sync()
 
 	// 设置 Gin 模式
 	gin.SetMode(cfg.Server.Mode)
@@ -38,8 +45,8 @@ func main() {
 
 	// 启动服务器
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
-	log.Printf("服务器启动在 %s", addr)
+	log.Info("服务器启动", zap.String("addr", addr))
 	if err := router.Run(addr); err != nil {
-		log.Fatalf("启动服务器失败: %v", err)
+		log.Fatal("启动服务器失败", zap.Error(err))
 	}
 }

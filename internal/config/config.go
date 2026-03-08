@@ -12,6 +12,7 @@ type Config struct {
 	Wechat WechatConfig `mapstructure:"wechat"`
 	Server ServerConfig `mapstructure:"server"`
 	API    APIConfig    `mapstructure:"api"`
+	Log    LogConfig    `mapstructure:"log"`
 }
 
 type WechatConfig struct {
@@ -29,6 +30,17 @@ type ServerConfig struct {
 type APIConfig struct {
 	IPWhitelist []string `mapstructure:"ip_whitelist"`
 	APIKeys     []string `mapstructure:"api_keys"`
+}
+
+// 日志配置
+type LogConfig struct {
+	Level       string `mapstructure:"level"`       // 日志级别：debug, info, warn, error
+	Path        string `mapstructure:"path"`        // 日志文件路径
+	Console     bool   `mapstructure:"console"`     // 是否在控制台打印日志
+	MaxSize     int    `mapstructure:"max_size"`    // 单个日志文件最大大小（MB）
+	MaxBackups  int    `mapstructure:"max_backups"` // 最大备份文件数
+	MaxAge      int    `mapstructure:"max_age"`     // 日志文件最大保存天数
+	Compress    bool   `mapstructure:"compress"`    // 是否压缩日志文件
 }
 
 func LoadConfig() (*Config, error) {

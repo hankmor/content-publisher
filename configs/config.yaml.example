@@ -16,4 +16,21 @@ api:
     - "127.0.0.1"
   # API Key，支持多个 Key
   api_keys:
-    - "your_api_key"
+    - "your_api_key_1"
+
+# 日志配置
+log:
+  # 日志级别：debug, info, warn, error
+  level: "info"
+  # 日志文件路径
+  path: "./logs"
+  # 是否在控制台打印日志
+  console: true
+  # 单个日志文件最大大小（MB）
+  max_size: 100
+  # 最大备份文件数
+  max_backups: 10
+  # 日志文件最大保存天数
+  max_age: 30
+  # 是否压缩日志文件
+  compress: false

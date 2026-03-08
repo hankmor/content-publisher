@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hankmor/wechat-publisher/internal/log"
 	"github.com/hankmor/wechat-publisher/internal/service"
+	"go.uber.org/zap"
 )
 
 type Controller struct {
@@ -22,44 +24,52 @@ func NewController(materialService *service.MaterialService, draftService *servi
 func (c *Controller) UploadMaterialImage(ctx *gin.Context) {
 	file, err := ctx.FormFile("image")
 	if err != nil {
+		log.Error("获取上传文件失败", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	tempPath := "/tmp/" + file.Filename
 	if err := ctx.SaveUploadedFile(file, tempPath); err != nil {
+		log.Error("保存上传文件失败", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	mediaID, err := c.materialService.UploadMaterialImage(tempPath)
 	if err != nil {
+		log.Error("上传素材图片失败", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Info("上传素材图片成功", zap.String("media_id", mediaID))
 	ctx.JSON(http.StatusOK, gin.H{"media_id": mediaID})
 }
 
 func (c *Controller) UploadNewsImage(ctx *gin.Context) {
 	file, err := ctx.FormFile("image")
 	if err != nil {
+		log.Error("获取上传文件失败", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	tempPath := "/tmp/" + file.Filename
 	if err := ctx.SaveUploadedFile(file, tempPath); err != nil {
+		log.Error("保存上传文件失败", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	url, err := c.materialService.UploadNewsImage(tempPath)
 	if err != nil {
+		log.Error("上传图文消息图片失败", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Info("上传图文消息图片成功", zap.String("url", url))
 	ctx.JSON(http.StatusOK, gin.H{"url": url})
 }
 
@@ -86,6 +96,7 @@ func (c *Controller) CreateDraft(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Error("解析请求参数失败", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
@@ -131,15 +142,18 @@ func (c *Controller) CreateDraft(ctx *gin.Context) {
 		}
 		mediaID, err = c.draftService.AddDraftWithType("newspic", articleWithType)
 	} else {
+		log.Error("不支持的草稿类型", zap.String("type", request.Type))
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "不支持的草稿类型"})
 		return
 	}
 
 	if err != nil {
+		log.Error("创建草稿失败", zap.Error(err))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Info("创建草稿成功", zap.String("type", request.Type), zap.String("media_id", mediaID))
 	ctx.JSON(http.StatusOK, gin.H{"media_id": mediaID})
 }
 
@@ -149,15 +163,18 @@ func (c *Controller) PublishDraft(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&request); err != nil {
+		log.Error("解析请求参数失败", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	publishID, err := c.draftService.PublishDraft(request.MediaID)
 	if err != nil {
+		log.Error("发布草稿失败", zap.Error(err), zap.String("media_id", request.MediaID))
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
+	log.Info("发布草稿成功", zap.String("media_id", request.MediaID), zap.Int64("publish_id", publishID))
 	ctx.JSON(http.StatusOK, gin.H{"publish_id": publishID})
 }
