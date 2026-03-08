@@ -82,6 +82,7 @@
         <button class="tablinks" onclick="openTab(event, 'upload')">上传图片</button>
         <button class="tablinks" onclick="openTab(event, 'draft')">创建草稿</button>
         <button class="tablinks" onclick="openTab(event, 'publish')">发布草稿</button>
+        <button class="tablinks" onclick="openTab(event, 'createAndPublish')">创建并发布</button>
     </div>
 
     <div id="upload" class="tabcontent">
@@ -170,6 +171,65 @@
             <button type="submit">发布</button>
         </form>
         <div class="result" id="publishResult"></div>
+    </div>
+
+    <div id="createAndPublish" class="tabcontent">
+        <h2>创建并发布</h2>
+        <p style="color: #666; margin-bottom: 20px;">此功能会先创建草稿，然后立即发布，适合快速发布内容。</p>
+        <form id="createAndPublishForm">
+            <div class="form-group">
+                <label for="cpDraftType">草稿类型：</label>
+                <select id="cpDraftType" name="type">
+                    <option value="news">图文消息</option>
+                    <option value="newspic">图片消息</option>
+                </select>
+            </div>
+            <div class="form-group" id="cpNewsFields">
+                <label for="cpTitle">标题：</label>
+                <input type="text" id="cpTitle" name="title" value="测试标题" required>
+            </div>
+            <div class="form-group" id="cpNewsFields">
+                <label for="cpAuthor">作者：</label>
+                <input type="text" id="cpAuthor" name="author" value="极客老墨" required>
+            </div>
+            <div class="form-group" id="cpNewsFields">
+                <label for="cpDigest">摘要：</label>
+                <textarea id="cpDigest" name="digest">测试摘要</textarea>
+            </div>
+            <div class="form-group" id="cpNewsFields">
+                <label for="cpContent">内容：</label>
+                <textarea id="cpContent" name="content"
+                    required>这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
+            </div>
+            <div class="form-group" id="cpNewsFields">
+                <label for="cpThumbMediaId">封面图片MediaID：</label>
+                <input type="text" id="cpThumbMediaId" name="thumb_media_id" required>
+            </div>
+            <div class="form-group cpImageFields" style="display: none;">
+                <label for="cpImageTitle">标题：</label>
+                <input type="text" id="cpImageTitle" name="image_title" required>
+            </div>
+            <div class="form-group cpImageFields" style="display: none;">
+                <label for="cpImageAuthor">作者：</label>
+                <input type="text" id="cpImageAuthor" name="image_author">
+            </div>
+            <div class="form-group cpImageFields" style="display: none;">
+                <label for="cpImageContent">内容：</label>
+                <textarea id="cpImageContent" name="image_content"></textarea>
+            </div>
+            <div class="form-group cpImageFields" style="display: none;">
+                <label>图片MediaID列表：</label>
+                <div id="cpMediaIdList">
+                    <div class="media-id-item">
+                        <input type="text" class="cp-media-id-input" placeholder="请输入图片MediaID">
+                        <button type="button" onclick="removeCpMediaIdItem(this)">删除</button>
+                    </div>
+                </div>
+                <button type="button" onclick="addCpMediaIdItem()">添加图片</button>
+            </div>
+            <button type="submit" style="background-color: #ff5722;">创建并立即发布</button>
+        </form>
+        <div class="result" id="createAndPublishResult"></div>
     </div>
 
     <script>
@@ -337,6 +397,125 @@
                 document.getElementById('publishResult').innerHTML = '错误：' + error.message;
             });
         });
+
+    // 添加图片MediaID输入框（创建并发布）
+    function addCpMediaIdItem() {
+        var mediaIdList = document.getElementById('cpMediaIdList');
+        var newItem = document.createElement('div');
+        newItem.className = 'media-id-item';
+        newItem.innerHTML = `
+                <input type="text" class="cp-media-id-input" placeholder="请输入图片MediaID">
+                <button type="button" onclick="removeCpMediaIdItem(this)">删除</button>
+            `;
+        mediaIdList.appendChild(newItem);
+    }
+
+    // 删除图片MediaID输入框（创建并发布）
+    function removeCpMediaIdItem(button) {
+        var item = button.parentElement;
+        var mediaIdList = document.getElementById('cpMediaIdList');
+        if (mediaIdList.children.length > 1) {
+            mediaIdList.removeChild(item);
+        }
+    }
+
+    // 创建并发布 - 草稿类型选择逻辑
+    document.getElementById('cpDraftType').addEventListener('change', function () {
+        var type = this.value;
+        if (type === 'news') {
+            document.querySelectorAll('#cpNewsFields').forEach(function (field) {
+                field.style.display = 'block';
+            });
+            document.querySelectorAll('.cpImageFields').forEach(function (field) {
+                field.style.display = 'none';
+            });
+        } else if (type === 'newspic') {
+            document.querySelectorAll('#cpNewsFields').forEach(function (field) {
+                field.style.display = 'none';
+            });
+            document.querySelectorAll('.cpImageFields').forEach(function (field) {
+                field.style.display = 'block';
+            });
+        }
+    });
+
+    // 创建并发布
+    document.getElementById('createAndPublishForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var type = document.getElementById('cpDraftType').value;
+        var formData = { type: type };
+
+        if (type === 'news') {
+            formData.article = {
+                title: document.getElementById('cpTitle').value,
+                author: document.getElementById('cpAuthor').value,
+                digest: document.getElementById('cpDigest').value,
+                content: document.getElementById('cpContent').value,
+                thumb_media_id: document.getElementById('cpThumbMediaId').value,
+                need_open_comment: 0,
+                only_fans_can_comment: 0
+            };
+        } else if (type === 'newspic') {
+            // 收集图片MediaID列表
+            var mediaIdList = [];
+            var mediaIdInputs = document.querySelectorAll('.cp-media-id-input');
+            mediaIdInputs.forEach(function (input) {
+                if (input.value.trim() !== '') {
+                    mediaIdList.push(input.value.trim());
+                }
+            });
+
+            formData.image_article = {
+                title: document.getElementById('cpImageTitle').value,
+                author: document.getElementById('cpImageAuthor').value,
+                content: document.getElementById('cpImageContent').value,
+                media_id_list: mediaIdList
+            };
+        }
+
+        var resultDiv = document.getElementById('createAndPublishResult');
+        resultDiv.innerHTML = '<p>正在创建草稿...</p>';
+
+        // 第一步：创建草稿
+        fetch('/api/draft/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = '<p style="color: red;">创建草稿失败：' + data.error + '</p>';
+                    return Promise.reject('创建草稿失败');
+                }
+
+                resultDiv.innerHTML = '<p>草稿创建成功，MediaID: ' + data.media_id + '</p><p>正在发布...</p>';
+
+                // 第二步：发布草稿
+                return fetch('/api/draft/publish', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ media_id: data.media_id })
+                });
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML += '<p style="color: red;">发布失败：' + data.error + '</p>';
+                } else {
+                    resultDiv.innerHTML += '<p style="color: green;">发布成功！PublishID: ' + data.publish_id + '</p>';
+                }
+            })
+            .catch(error => {
+                if (error !== '创建草稿失败') {
+                    resultDiv.innerHTML += '<p style="color: red;">错误：' + error.message + '</p>';
+                }
+            });
+    });
     </script>
 </body>
 </html>
