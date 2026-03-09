@@ -5,11 +5,32 @@
 所有 API 接口都需要进行访问控制，具体要求如下：
 
 - **IP 白名单**：客户端 IP 必须在配置文件的 `api.ip_whitelist` 中
-- **API Key**：客户端必须提供有效的 API Key，API Key 在传输过程中会被自动哈希处理，确保安全传输。可以通过以下方式之一传递：
-  - 请求头：`X-API-Key: your_api_key`
-  - 查询参数：`?api_key=your_api_key`
+- **API Key**：客户端必须提供有效的 API Key（SHA256 哈希值）。可以通过以下方式之一传递：
+  - 请求头：`X-API-Key: your_api_key_hash`
+  - 查询参数：`?api_key=your_api_key_hash`
 
-**注意**：API Key 在服务器端会使用 SHA256 算法进行哈希处理后再与配置文件中的 API Key 进行比较，确保传输过程中的安全性。
+**重要**：
+1. **客户端需要先对 API Key 进行 SHA256 哈希处理**，然后传递哈希值
+2. 配置文件中存储的是明文 API Key，服务器端会自动进行哈希验证
+3. 生成 API Key 哈希值的命令：
+   ```bash
+   echo -n "your_api_key" | shasum -a 256 | awk '{print $1}'
+   ```
+
+**示例**：
+- 原始 API Key：`openclaw_niubi_2026`
+- 哈希后的 API Key：`f6b869f1420f8dbdd0d9b04407ef5fbee85bc328b8a5be01938d2b7f20591fe7`
+- 请求时传递：`X-API-Key: f6b869f1420f8dbdd0d9b04407ef5fbee85bc328b8a5be01938d2b7f20591fe7`
+
+## 1.1 频率限制
+
+如果启用了频率限制（在配置文件中设置 `api.rate_limit.enabled: true`），则：
+
+- 每个 API Key 每天最多创建 `api.rate_limit.max_draft_per_day` 次草稿（默认 5 次）
+- 超过限制时返回 `429` 状态码
+- 响应头中包含剩余次数信息：
+  - `X-RateLimit-Limit`: 总限制次数
+  - `X-RateLimit-Remaining`: 剩余次数
 
 ## 2. API 接口列表
 

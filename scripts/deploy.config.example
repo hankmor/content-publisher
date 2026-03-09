@@ -1,0 +1,16 @@
+# 部署配置文件
+# 使用方法：复制此文件为 deploy.config，然后修改相关配置
+# cp deploy.config.example deploy.config
+
+# 服务器配置
+SERVER_USER="root"                    # 服务器用户名
+SERVER_HOST="your-server.com"           # 服务器地址
+SERVER_PORT="22"                      # SSH 端口
+
+# 部署配置
+DEPLOY_PATH="/opt/wechat-publisher"      # 部署路径
+SERVICE_NAME="wechat-publisher"           # 服务名称
+BACKUP_DIR="/opt/wechat-publisher-backup" # 备份目录
+
+# 服务配置
+SERVICE_PORT="8080"                     # 服务监听端口

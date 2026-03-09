@@ -78,12 +78,9 @@ func HashAPIKey(apiKey string) string {
 
 // isAPIKeyValid 检查 API Key 是否有效
 func isAPIKeyValid(apiKey string, validKeys []string) bool {
-	// 对客户端提供的 API Key 进行哈希处理
-	hashedAPIKey := HashAPIKey(apiKey)
-
-	// 对配置中的每个有效 API Key 进行哈希处理并比较
+	// 客户端传递的 API Key 是 hash 值，对配置文件中的 API Key 进行哈希处理并比较
 	for _, key := range validKeys {
-		if hashedAPIKey == HashAPIKey(key) {
+		if apiKey == HashAPIKey(key) {
 			return true
 		}
 	}

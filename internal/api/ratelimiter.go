@@ -178,8 +178,8 @@ func RateLimitMiddleware(store *RateLimitStore, cfg *RateLimitConfig) gin.Handle
 			return
 		}
 
-		// 计算 API Key 的哈希
-	apiKeyHash := HashAPIKey(apiKey)
+		// 客户端传递的 API Key 已经是 hash 值，直接使用
+		apiKeyHash := apiKey
 
 		// 检查并增加次数
 		allowed, count, err := store.CheckAndIncrement(apiKeyHash, cfg.MaxDraftPerDay)

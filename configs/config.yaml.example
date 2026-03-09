@@ -14,9 +14,9 @@ api:
   # IP 白名单，支持多个 IP（如果启用频率限制，可以只保留 127.0.0.1）
   ip_whitelist:
     - "127.0.0.1"
-  # API Key，支持多个 Key
+  # API Key，支持多个 Key（明文存储，服务器端会自动进行哈希验证）
   api_keys:
-    - "your_api_key_1"
+    - "your_api_key"
   # 频率限制配置
   rate_limit:
     enabled: true              # 是否启用频率限制

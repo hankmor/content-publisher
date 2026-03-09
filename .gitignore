@@ -1,6 +1,9 @@
 # 配置文件
 config.yaml
 
+# 部署配置文件
+scripts/deploy.config
+
 # 编译产物
 *.exe
 *.exe~
