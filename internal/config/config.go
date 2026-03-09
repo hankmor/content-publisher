@@ -26,10 +26,17 @@ type ServerConfig struct {
 	Mode string `mapstructure:"mode"`
 }
 
+// RateLimitConfig 频率限制配置
+type RateLimitConfig struct {
+	Enabled        bool `mapstructure:"enabled"`
+	MaxDraftPerDay int  `mapstructure:"max_draft_per_day"`
+}
+
 // API 访问控制配置
 type APIConfig struct {
-	IPWhitelist []string `mapstructure:"ip_whitelist"`
-	APIKeys     []string `mapstructure:"api_keys"`
+	IPWhitelist []string          `mapstructure:"ip_whitelist"`
+	APIKeys     []string          `mapstructure:"api_keys"`
+	RateLimit   RateLimitConfig   `mapstructure:"rate_limit"`
 }
 
 // 日志配置

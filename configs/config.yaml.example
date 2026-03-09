@@ -11,12 +11,16 @@ server:
 
 # API 访问控制配置
 api:
-  # IP 白名单，支持多个 IP
+  # IP 白名单，支持多个 IP（如果启用频率限制，可以只保留 127.0.0.1）
   ip_whitelist:
     - "127.0.0.1"
   # API Key，支持多个 Key
   api_keys:
     - "your_api_key_1"
+  # 频率限制配置
+  rate_limit:
+    enabled: true              # 是否启用频率限制
+    max_draft_per_day: 5       # 每个 API Key 每天最多创建草稿次数
 
 # 日志配置
 log:
