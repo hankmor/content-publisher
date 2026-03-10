@@ -4,7 +4,9 @@
 # 用法：
 # ./build.sh                # 构建所有平台
 # ./build.sh darwin         # 只构建 macOS 版本
-# ./build.sh linux          # 只构建 Linux 版本
+# ./build.sh linux          # 只构建 Linux 版本（包含 amd64 和 arm64）
+# ./build.sh linux-amd64    # 只构建 Linux AMD64 版本
+# ./build.sh linux-arm64    # 只构建 Linux ARM64 版本
 # ./build.sh windows        # 只构建 Windows 版本
 
 # 定义函数：构建指定平台
@@ -34,27 +36,37 @@ mkdir -p output
 # 构建指定平台
 case ${PLATFORM} in
   "darwin")
-    build_platform "darwin" "amd64" "" "macOS"
+    build_platform "darwin" "amd64" "" "macOS AMD64"
+    build_platform "darwin" "arm64" "" "macOS ARM64"
     ;;
   "linux")
-    build_platform "linux" "amd64" "" "Linux"
+    build_platform "linux" "amd64" "" "Linux AMD64"
+    build_platform "linux" "arm64" "" "Linux ARM64"
+    ;;
+  "linux-amd64")
+    build_platform "linux" "amd64" "" "Linux AMD64"
+    ;;
+  "linux-arm64")
+    build_platform "linux" "arm64" "" "Linux ARM64"
     ;;
   "windows")
-    build_platform "windows" "amd64" ".exe" "Windows"
+    build_platform "windows" "amd64" ".exe" "Windows AMD64"
     ;;
   "all")
     # 构建 macOS 版本
-    build_platform "darwin" "amd64" "" "macOS"
+    build_platform "darwin" "amd64" "" "macOS AMD64"
+    build_platform "darwin" "arm64" "" "macOS ARM64"
     
     # 构建 Linux 版本
-    build_platform "linux" "amd64" "" "Linux"
+    build_platform "linux" "amd64" "" "Linux AMD64"
+    build_platform "linux" "arm64" "" "Linux ARM64"
     
     # 构建 Windows 版本
-    build_platform "windows" "amd64" ".exe" "Windows"
+    build_platform "windows" "amd64" ".exe" "Windows AMD64"
     ;;
   *)
     echo "错误：不支持的平台 ${PLATFORM}"
-    echo "支持的平台：darwin, linux, windows, all"
+    echo "支持的平台：darwin, linux, linux-amd64, linux-arm64, windows, all"
     exit 1
     ;;
 esac
@@ -64,6 +76,7 @@ echo "复制配置文件和 demo.html 到输出目录..."
 mkdir -p output/configs
 cp -r configs/* output/configs/
 cp demo.html output/
+cp API_GUIDE.md output/
 
 echo "构建完成！可执行文件和配置文件已输出到 output 目录。"
 echo ""

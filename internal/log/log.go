@@ -88,6 +88,11 @@ func Debug(msg string, fields ...zap.Field) {
 	Logger.Debug(msg, fields...)
 }
 
+// Warn 打印 warn 级别日志
+func Warn(msg string, fields ...zap.Field) {
+	Logger.Warn(msg, fields...)
+}
+
 // Error 打印 error 级别日志
 func Error(msg string, fields ...zap.Field) {
 	Logger.Error(msg, fields...)

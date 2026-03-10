@@ -14,12 +14,12 @@ import (
 func AccessControlMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// 1. 检查 IP 白名单
-		clientIP := getClientIP(ctx)
-		if !isIPAllowed(clientIP, cfg.API.IPWhitelist) {
-			ctx.JSON(http.StatusForbidden, gin.H{"error": "IP 不在白名单内"})
-			ctx.Abort()
-			return
-		}
+		// clientIP := getClientIP(ctx)
+		// if !isIPAllowed(clientIP, cfg.API.IPWhitelist) {
+		// 	ctx.JSON(http.StatusForbidden, gin.H{"error": "IP 不在白名单内"})
+		// 	ctx.Abort()
+		// 	return
+		// }
 
 		// 2. 检查 API Key
 		apiKey := getAPIKey(ctx)
