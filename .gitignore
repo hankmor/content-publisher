@@ -29,3 +29,5 @@ logs/
 wechat-publisher
 output/
 data
+
+deploy.config.example

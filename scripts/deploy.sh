@@ -16,13 +16,33 @@
 #   ./deploy.sh linux logs   # 查看日志
 #   ./deploy.sh linux status # 查看服务状态
 
-# 配置部分（请根据实际情况修改）
-SERVER_USER="root"                    # 服务器用户名
-SERVER_HOST="your-server.com"           # 服务器地址
-SERVER_PORT="22"                      # SSH 端口
-DEPLOY_PATH="/opt/wechat-publisher"      # 部署路径
-SERVICE_NAME="wechat-publisher"           # 服务名称
-BACKUP_DIR="/opt/wechat-publisher-backup" # 备份目录
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# 加载配置文件
+CONFIG_FILE="${SCRIPT_DIR}/deploy.config"
+if [ -f "${CONFIG_FILE}" ]; then
+    source "${CONFIG_FILE}"
+else
+    echo "错误：配置文件不存在: ${CONFIG_FILE}"
+    echo "请复制配置文件模板并修改:"
+    echo "  cp ${SCRIPT_DIR}/deploy.config.example ${SCRIPT_DIR}/deploy.config"
+    echo "  然后编辑 ${SCRIPT_DIR}/deploy.config 配置您的服务器信息"
+    exit 1
+fi
+
+# 检查必要的配置项
+if [ -z "${SERVER_HOST}" ] || [ "${SERVER_HOST}" = "your-server.com" ]; then
+    echo "错误：请在配置文件中设置 SERVER_HOST"
+    exit 1
+fi
+
+# 设置默认值
+SERVER_USER=${SERVER_USER:-"root"}
+SERVER_PORT=${SERVER_PORT:-"22"}
+DEPLOY_PATH=${DEPLOY_PATH:-"/opt/wechat-publisher"}
+SERVICE_NAME=${SERVICE_NAME:-"wechat-publisher"}
+BACKUP_DIR=${BACKUP_DIR:-"/opt/wechat-publisher-backup"}
 
 # 颜色输出
 RED='\033[0;31m'
