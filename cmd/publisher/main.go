@@ -92,12 +92,13 @@ func main() {
 		log.Warn("API文档文件不存在", zap.String("path", apiGuidePath))
 	}
 
-	// if _, err := os.Stat(demoPath); err == nil {
-	// 	router.StaticFile("/demo", demoPath)
-	// 	log.Info("Demo页面服务已启用", zap.String("path", demoPath))
-	// } else {
-	// 	log.Warn("Demo页面文件不存在", zap.String("path", demoPath))
-	// }
+	demoPath := filepath.Join(staticDir, "demo.html")
+	if _, err := os.Stat(demoPath); err == nil {
+		router.StaticFile("/demo", demoPath)
+		log.Info("Demo页面服务已启用", zap.String("path", demoPath))
+	} else {
+		log.Warn("Demo页面文件不存在", zap.String("path", demoPath))
+	}
 
 	// 传递配置到路由设置
 	api.SetupRoutes(router, controller, cfg)

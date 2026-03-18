@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,7 +31,7 @@ type APIKeyLimit struct {
 
 // NewRateLimitStore 创建频率限制存储
 func NewRateLimitStore(dataDir string) (*RateLimitStore, error) {
-	if err := os.MkdirAll(dataDir, 0755); err != nil {
+	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		return nil, fmt.Errorf("创建数据目录失败: %w", err)
 	}
 
@@ -94,7 +95,7 @@ func (s *RateLimitStore) save() error {
 		return err
 	}
 
-	return os.WriteFile(s.filePath, data, 0644)
+	return os.WriteFile(s.filePath, data, 0o644)
 }
 
 // needReset 检查是否需要重置计数
@@ -170,9 +171,10 @@ func RateLimitMiddleware(store *RateLimitStore, cfg *RateLimitConfig) gin.Handle
 			return
 		}
 
-		// 获取 API Key
-		apiKey := getAPIKey(ctx)
+		// 获取 API Key 并进行规范化处理（转小写）
+		apiKey := strings.ToLower(getAPIKey(ctx))
 		if apiKey == "" {
+			log.Error("missing api key", zap.String("path", ctx.Request.URL.Path))
 			ctx.JSON(401, gin.H{"error": "缺少 API Key"})
 			ctx.Abort()
 			return
@@ -192,7 +194,7 @@ func RateLimitMiddleware(store *RateLimitStore, cfg *RateLimitConfig) gin.Handle
 
 		if !allowed {
 			ctx.JSON(429, gin.H{
-				"error": fmt.Sprintf("已达到今日发布上限（%d次），请明天再试", cfg.MaxDraftPerDay),
+				"error":         fmt.Sprintf("已达到今日发布上限（%d次），请明天再试", cfg.MaxDraftPerDay),
 				"current_count": count,
 				"max_limit":     cfg.MaxDraftPerDay,
 			})

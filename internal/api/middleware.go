@@ -2,16 +2,25 @@ package api
 
 import (
 	"crypto/sha256"
+	"crypto/subtle"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hankmor/wechat-publisher/internal/config"
+	"github.com/hankmor/wechat-publisher/internal/log"
+	"go.uber.org/zap"
 )
 
 // AccessControlMiddleware 访问控制中间件
 func AccessControlMiddleware(cfg *config.Config) gin.HandlerFunc {
+	// 预先计算配置中所有 API Key 的哈希值，避免每次请求都进行哈希运算
+	var hashedValidKeys []string
+	for _, key := range cfg.API.APIKeys {
+		hashedValidKeys = append(hashedValidKeys, HashAPIKey(key))
+	}
+
 	return func(ctx *gin.Context) {
 		// 1. 检查 IP 白名单
 		// clientIP := getClientIP(ctx)
@@ -22,8 +31,21 @@ func AccessControlMiddleware(cfg *config.Config) gin.HandlerFunc {
 		// }
 
 		// 2. 检查 API Key
-		apiKey := getAPIKey(ctx)
-		if !isAPIKeyValid(apiKey, cfg.API.APIKeys) {
+		apiKey := strings.ToLower(getAPIKey(ctx))
+
+		// 仅在日志中记录 API Key 的前 8 位，防止泄露
+		maskedKey := "nil"
+		if apiKey != "" {
+			if len(apiKey) > 8 {
+				maskedKey = apiKey[:8] + "..."
+			} else {
+				maskedKey = apiKey
+			}
+		}
+		log.Info("API Access Control", zap.String("api_key_masked", maskedKey))
+
+		if !isAPIKeyValid(apiKey, hashedValidKeys) {
+			log.Error("invalid api key", zap.String("api_key_masked", maskedKey))
 			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "无效的 API Key"})
 			ctx.Abort()
 			return
@@ -51,7 +73,7 @@ func isIPAllowed(ip string, whitelist []string) bool {
 	if ip == "::1" {
 		ip = "127.0.0.1"
 	}
-	
+
 	for _, allowedIP := range whitelist {
 		if ip == allowedIP {
 			return true
@@ -77,10 +99,16 @@ func HashAPIKey(apiKey string) string {
 }
 
 // isAPIKeyValid 检查 API Key 是否有效
-func isAPIKeyValid(apiKey string, validKeys []string) bool {
-	// 客户端传递的 API Key 是 hash 值，对配置文件中的 API Key 进行哈希处理并比较
-	for _, key := range validKeys {
-		if apiKey == HashAPIKey(key) {
+func isAPIKeyValid(apiKey string, hashedValidKeys []string) bool {
+	if apiKey == "" {
+		return false
+	}
+
+	// 客户端传递的 API Key 已经是 hash 值
+	apiKeyBytes := []byte(apiKey)
+	for _, validHash := range hashedValidKeys {
+		// 使用常量时间比对，防止计时攻击
+		if subtle.ConstantTimeCompare(apiKeyBytes, []byte(validHash)) == 1 {
 			return true
 		}
 	}

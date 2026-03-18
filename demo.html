@@ -77,6 +77,15 @@
 </head>
 <body>
     <h1>微信发布工具测试</h1>
+
+    <div class="result" style="margin-bottom: 20px; background-color: #e3f2fd; border: 1px solid #2196f3;">
+        <h3>API 访问配置</h3>
+        <div class="form-group">
+            <label for="apiKey">API Key (明文):</label>
+            <input type="password" id="apiKey" placeholder="请输入配置文件中的 api_keys 之一" style="width: 80%; padding: 10px; margin-right: 10px;">
+            <p style="font-size: 0.8em; color: #666;">注：客户端会自动计算 SHA256 哈希值并发送。明文 Key 不会发送到服务器。</p>
+        </div>
+    </div>
     
     <div class="tab">
         <button class="tablinks" onclick="openTab(event, 'upload')">上传图片</button>
@@ -114,29 +123,47 @@
                     <option value="newspic">图片消息</option>
                 </select>
             </div>
-            <div class="form-group" id="newsFields">
+            <div class="form-group news-fields">
                 <label for="title">标题：</label>
-                <input type="text" id="title" name="title" value="测试标题" required>
+                <input type="text" id="title" name="title" value="测试标题">
             </div>
-            <div class="form-group" id="newsFields">
+            <div class="form-group news-fields">
                 <label for="author">作者：</label>
-                <input type="text" id="author" name="author" value="极客老墨" required>
+                <input type="text" id="author" name="author" value="极客老墨">
             </div>
-            <div class="form-group" id="newsFields">
+            <div class="form-group news-fields">
                 <label for="digest">摘要：</label>
                 <textarea id="digest" name="digest">测试摘要</textarea>
             </div>
-            <div class="form-group" id="newsFields">
+            <div class="form-group news-fields">
                 <label for="content">内容：</label>
-                <textarea id="content" name="content" required>这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
+                <textarea id="content" name="content">这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
             </div>
-            <div class="form-group" id="newsFields">
+            <div class="form-group news-fields">
                 <label for="thumbMediaId">封面图片MediaID：</label>
-                <input type="text" id="thumbMediaId" name="thumb_media_id" required>
+                <input type="text" id="thumbMediaId" name="thumb_media_id">
             </div>
-            <div class="form-group imageFields" style="display: none;">
+            <div class="form-group image-fields" style="display: none;">
                 <label for="imageTitle">标题：</label>
-                <input type="text" id="imageTitle" name="image_title" required>
+                <input type="text" id="imageTitle" name="image_title">
+            </div>
+            <div class="form-group image-fields" style="display: none;">
+                <label for="imageAuthor">作者：</label>
+                <input type="text" id="imageAuthor" name="image_author">
+            </div>
+            <div class="form-group image-fields" style="display: none;">
+                <label for="imageContent">内容：</label>
+                <textarea id="imageContent" name="image_content"></textarea>
+            </div>
+            <div class="form-group image-fields" style="display: none;">
+                <label>图片MediaID列表：</label>
+                <div id="mediaIdList">
+                    <div class="media-id-item">
+                        <input type="text" class="media-id-input" placeholder="请输入图片MediaID">
+                        <button type="button" onclick="removeMediaIdItem(this)">删除</button>
+                    </div>
+                </div>
+                <button type="button" onclick="addMediaIdItem()">添加图片</button>
             </div>
             <div class="form-group imageFields" style="display: none;">
                 <label for="imageAuthor">作者：</label>
@@ -184,40 +211,39 @@
                     <option value="newspic">图片消息</option>
                 </select>
             </div>
-            <div class="form-group" id="cpNewsFields">
+            <div class="form-group cp-news-fields">
                 <label for="cpTitle">标题：</label>
-                <input type="text" id="cpTitle" name="title" value="测试标题" required>
+                <input type="text" id="cpTitle" name="title" value="测试标题">
             </div>
-            <div class="form-group" id="cpNewsFields">
+            <div class="form-group cp-news-fields">
                 <label for="cpAuthor">作者：</label>
-                <input type="text" id="cpAuthor" name="author" value="极客老墨" required>
+                <input type="text" id="cpAuthor" name="author" value="极客老墨">
             </div>
-            <div class="form-group" id="cpNewsFields">
+            <div class="form-group cp-news-fields">
                 <label for="cpDigest">摘要：</label>
                 <textarea id="cpDigest" name="digest">测试摘要</textarea>
             </div>
-            <div class="form-group" id="cpNewsFields">
+            <div class="form-group cp-news-fields">
                 <label for="cpContent">内容：</label>
-                <textarea id="cpContent" name="content"
-                    required>这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
+                <textarea id="cpContent" name="content">这是一个测试内容：<img src="http://mmbiz.qpic.cn/mmbiz_jpg/nwYvu0QPWHCtyTUbzUicovR9iaIQ7ibQIMx7NXJ1mkrMWkahGH0uW86KFiaicgl3HzkOwRGrnFibFwdXHEOLia2fhMfssmRRGr9OYDryLkUxfibUX8c/0?from=appmsg" style="max-width: 100%;"></textarea>
             </div>
-            <div class="form-group" id="cpNewsFields">
+            <div class="form-group cp-news-fields">
                 <label for="cpThumbMediaId">封面图片MediaID：</label>
-                <input type="text" id="cpThumbMediaId" name="thumb_media_id" required>
+                <input type="text" id="cpThumbMediaId" name="thumb_media_id">
             </div>
-            <div class="form-group cpImageFields" style="display: none;">
+            <div class="form-group cp-image-fields" style="display: none;">
                 <label for="cpImageTitle">标题：</label>
-                <input type="text" id="cpImageTitle" name="image_title" required>
+                <input type="text" id="cpImageTitle" name="image_title">
             </div>
-            <div class="form-group cpImageFields" style="display: none;">
+            <div class="form-group cp-image-fields" style="display: none;">
                 <label for="cpImageAuthor">作者：</label>
                 <input type="text" id="cpImageAuthor" name="image_author">
             </div>
-            <div class="form-group cpImageFields" style="display: none;">
+            <div class="form-group cp-image-fields" style="display: none;">
                 <label for="cpImageContent">内容：</label>
                 <textarea id="cpImageContent" name="image_content"></textarea>
             </div>
-            <div class="form-group cpImageFields" style="display: none;">
+            <div class="form-group cp-image-fields" style="display: none;">
                 <label>图片MediaID列表：</label>
                 <div id="cpMediaIdList">
                     <div class="media-id-item">
@@ -233,6 +259,30 @@
     </div>
 
     <script>
+        // 计算 SHA256 哈希值
+        async function hashAPIKey(apiKey) {
+            if (!apiKey) return "";
+            const msgBuffer = new TextEncoder().encode(apiKey);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // 获取通用的请求头
+        async function getCommonHeaders(contentType = 'application/json') {
+            const apiKey = document.getElementById('apiKey').value;
+            const apiKeyHash = await hashAPIKey(apiKey);
+            const headers = {};
+            if (contentType) {
+                headers['Content-Type'] = contentType;
+            }
+            if (apiKeyHash) {
+                headers['X-API-Key'] = apiKeyHash;
+            }
+            return headers;
+        }
+
         function openTab(evt, tabName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
@@ -286,9 +336,18 @@
                 url = '/api/upload/news-image';
             }
 
-            fetch(url, {
-                method: 'POST',
-                body: formData
+            // 获取 API Key 哈希值
+            hashAPIKey(document.getElementById('apiKey').value).then(apiKeyHash => {
+                const headers = {};
+                if (apiKeyHash) {
+                    headers['X-API-Key'] = apiKeyHash;
+                }
+
+                return fetch(url, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
             })
             .then(response => response.json())
             .then(data => {
@@ -306,24 +365,34 @@
         });
 
         // 草稿类型选择逻辑
-        document.getElementById('draftType').addEventListener('change', function() {
-            var type = this.value;
+        function updateDraftRequiredFields(type) {
             if (type === 'news') {
-                document.querySelectorAll('#newsFields').forEach(function(field) {
-                    field.style.display = 'block';
-                });
-                document.querySelectorAll('.imageFields').forEach(function(field) {
-                    field.style.display = 'none';
-                });
+                document.querySelectorAll('.news-fields').forEach(field => field.style.display = 'block');
+                document.querySelectorAll('.image-fields').forEach(field => field.style.display = 'none');
+                
+                document.getElementById('title').required = true;
+                document.getElementById('author').required = true;
+                document.getElementById('content').required = true;
+                document.getElementById('thumbMediaId').required = true;
+                document.getElementById('imageTitle').required = false;
             } else if (type === 'newspic') {
-                document.querySelectorAll('#newsFields').forEach(function(field) {
-                    field.style.display = 'none';
-                });
-                document.querySelectorAll('.imageFields').forEach(function(field) {
-                    field.style.display = 'block';
-                });
+                document.querySelectorAll('.news-fields').forEach(field => field.style.display = 'none');
+                document.querySelectorAll('.image-fields').forEach(field => field.style.display = 'block');
+                
+                document.getElementById('title').required = false;
+                document.getElementById('author').required = false;
+                document.getElementById('content').required = false;
+                document.getElementById('thumbMediaId').required = false;
+                document.getElementById('imageTitle').required = true;
             }
+        }
+
+        document.getElementById('draftType').addEventListener('change', function() {
+            updateDraftRequiredFields(this.value);
         });
+
+        // 初始化草稿必填字段
+        updateDraftRequiredFields(document.getElementById('draftType').value);
 
         // 创建草稿
         document.getElementById('draftForm').addEventListener('submit', function(e) {
@@ -359,12 +428,12 @@
                 };
             }
 
-            fetch('/api/draft/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
+            getCommonHeaders().then(headers => {
+                return fetch('/api/draft/create', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(formData)
+                });
             })
             .then(response => response.json())
             .then(data => {
@@ -382,12 +451,12 @@
                 media_id: document.getElementById('mediaId').value
             };
 
-            fetch('/api/draft/publish', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
+            getCommonHeaders().then(headers => {
+                return fetch('/api/draft/publish', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(formData)
+                });
             })
             .then(response => response.json())
             .then(data => {
@@ -420,24 +489,34 @@
     }
 
     // 创建并发布 - 草稿类型选择逻辑
-    document.getElementById('cpDraftType').addEventListener('change', function () {
-        var type = this.value;
+    function updateCpDraftRequiredFields(type) {
         if (type === 'news') {
-            document.querySelectorAll('#cpNewsFields').forEach(function (field) {
-                field.style.display = 'block';
-            });
-            document.querySelectorAll('.cpImageFields').forEach(function (field) {
-                field.style.display = 'none';
-            });
+            document.querySelectorAll('.cp-news-fields').forEach(field => field.style.display = 'block');
+            document.querySelectorAll('.cp-image-fields').forEach(field => field.style.display = 'none');
+            
+            document.getElementById('cpTitle').required = true;
+            document.getElementById('cpAuthor').required = true;
+            document.getElementById('cpContent').required = true;
+            document.getElementById('cpThumbMediaId').required = true;
+            document.getElementById('cpImageTitle').required = false;
         } else if (type === 'newspic') {
-            document.querySelectorAll('#cpNewsFields').forEach(function (field) {
-                field.style.display = 'none';
-            });
-            document.querySelectorAll('.cpImageFields').forEach(function (field) {
-                field.style.display = 'block';
-            });
+            document.querySelectorAll('.cp-news-fields').forEach(field => field.style.display = 'none');
+            document.querySelectorAll('.cp-image-fields').forEach(field => field.style.display = 'block');
+            
+            document.getElementById('cpTitle').required = false;
+            document.getElementById('cpAuthor').required = false;
+            document.getElementById('cpContent').required = false;
+            document.getElementById('cpThumbMediaId').required = false;
+            document.getElementById('cpImageTitle').required = true;
         }
+    }
+
+    document.getElementById('cpDraftType').addEventListener('change', function () {
+        updateCpDraftRequiredFields(this.value);
     });
+
+    // 初始化创建并发布必填字段
+    updateCpDraftRequiredFields(document.getElementById('cpDraftType').value);
 
     // 创建并发布
     document.getElementById('createAndPublishForm').addEventListener('submit', function (e) {
@@ -477,12 +556,12 @@
         resultDiv.innerHTML = '<p>正在创建草稿...</p>';
 
         // 第一步：创建草稿
-        fetch('/api/draft/create', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(formData)
+        getCommonHeaders().then(headers => {
+            return fetch('/api/draft/create', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(formData)
+            });
         })
             .then(response => response.json())
             .then(data => {
@@ -494,12 +573,12 @@
                 resultDiv.innerHTML = '<p>草稿创建成功，MediaID: ' + data.media_id + '</p><p>正在发布...</p>';
 
                 // 第二步：发布草稿
-                return fetch('/api/draft/publish', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ media_id: data.media_id })
+                return getCommonHeaders().then(headers => {
+                    return fetch('/api/draft/publish', {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify({ media_id: data.media_id })
+                    });
                 });
             })
             .then(response => response.json())
